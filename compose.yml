@@ -1,0 +1,40 @@
+name: talleres360-auditoria
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: audit_db
+      POSTGRES_USER: ${DB_USERNAME:?Configura DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Configura DB_PASSWORD}
+    volumes:
+      - datos_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  auditoria:
+    build: .
+    image: talleres360/ms-auditoria:local
+    ports:
+      - "8085:8085"
+    environment:
+      SERVER_PORT: "8085"
+      SPRING_PROFILES_ACTIVE: postgres
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60"
+      TZ: America/Santiago
+      DB_URL: jdbc:postgresql://postgres:5432/audit_db
+      DB_USERNAME: ${DB_USERNAME:?Configura DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD:?Configura DB_PASSWORD}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?Configura INTERNAL_API_KEY}
+      KAFKA_ENABLED: ${KAFKA_ENABLED:-false}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-localhost:9092}
+      KAFKA_ORDERS_TOPIC: ${KAFKA_ORDERS_TOPIC:-orders.events}
+      KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-talleres360-auditoria}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  datos_postgres:
