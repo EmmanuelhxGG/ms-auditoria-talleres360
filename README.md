@@ -18,7 +18,6 @@ src/main/java/com/talleres360/auditoria/
 ├── messaging/     Consumidor Kafka.
 └── config/        Credencial interna, errores, OpenAPI y recuperación Kafka.
 src/main/resources/application.yml
-src/test/java/     Pruebas de negocio, API y lectura de mensajes.
 Dockerfile         Construcción por etapas; usuario no root.
 compose.yml        Aplicación y PostgreSQL con volumen independiente.
 .env.example       Configuración sin credenciales reales.
@@ -82,7 +81,7 @@ En PowerShell, desde la carpeta del proyecto:
 
 ```powershell
 $env:INTERNAL_API_KEY='una-clave-interna-larga-para-pruebas-locales'
-.\mvnw.cmd test
+.\mvnw.cmd '-DskipTests' package
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -124,10 +123,12 @@ Un fallo se reintenta dos veces con un segundo entre intentos. Si continúa, el 
 
 La ingesta HTTP permite pruebas independientes sin Kafka. No sustituye el flujo Kafka del caso. Las operaciones públicas son de lectura; el productor de eventos es Órdenes. No se aceptan actores obtenidos libremente del navegador: el productor debe derivarlos de la identidad autenticada.
 
-API Gateway sigue teniendo al BFF como destino. Para integrar esta API se configuran el destino y los permisos de auditoría en el BFF; si Gateway usa rutas explícitas, también debe admitir las nuevas rutas externas. Este repositorio no modifica el BFF, sus rutas, EC2 ni Gateway.
+API Gateway sigue teniendo al BFF como destino. Órdenes envía todos sus eventos mediante un outbox persistente a `/internal/events`. Configurar `AUDIT_URL=http://IP_PRIVADA:8085` en Órdenes y BFF y la misma clave interna. El BFF enruta `/api/audit`, `/api/audit/events` y el alias del dashboard `/api/reports/audit` a este servicio, exclusivamente para Admin. El frontend incluye una pantalla de solo lectura con filtros por orden, usuario, evento y fechas.
+
+El permiso Admin corresponde a la sección específica de la pantalla de auditoría del caso. La tabla general menciona Auditor, pero no se crea ese rol adicional en Azure. Si Gateway usa rutas explícitas, debe admitir las nuevas lecturas con el authorizer existente. Esta integración de código no configura EC2, Gateway, Kafka ni Azure.
 
 ## Seguridad y pruebas
 
 No publicar `.env`, claves internas, contraseñas ni PEM. No utilizar la clave interna desde el frontend. Restringir el puerto de este servicio a conexiones autorizadas y utilizar TLS cuando corresponda. La validación de usuarios Azure pertenece al BFF; este servicio valida la credencial de comunicación interna y el rol recibido de ese emisor confiable.
 
-Las pruebas verifican persistencia, idempotencia, rechazo de cambios sobre una identidad, precisión temporal, tipos y montos, permisos, filtros, paginación, OpenAPI, salud y lectura JSON de mensajes Kafka. No dependen de una EC2, Docker, un broker Kafka ni una base Oracle real; esos entornos tienen su validación de integración propia.
+La revisión local del 8 de octubre verificó persistencia, idempotencia, permisos, filtros, paginación y lectura JSON de eventos con H2. No verificó un broker Kafka, Oracle ni EC2. Los archivos de pruebas no forman parte de esta versión; el empaquetado no sustituye la validación del despliegue.
