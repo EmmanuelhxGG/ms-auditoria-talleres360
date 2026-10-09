@@ -25,6 +25,13 @@ compose.yml        Aplicación y PostgreSQL con volumen independiente.
 
 ## Funcionamiento
 
+La infraestructura independiente Kafka está en [infra/kafka](infra/kafka/README.md):
+tres brokers, tres ZooKeeper, Kafka UI y administrador Spring Boot. Con
+`KAFKA_ENABLED=true`, este servicio consume `orders.events` con el grupo
+`talleres360-auditoria`, persiste idempotentemente y publica `audit.timeline`.
+Los errores agotados se trasladan a `orders.events.audit.DLT`; Reportería utiliza
+otro grupo y su propio DLT, por lo que no compite con Auditoría por los eventos.
+
 1. Recibe un evento por HTTP interno o Kafka y valida su contenido.
 2. Usa `eventId` como identidad estable: repetir un evento no duplica la línea de tiempo. Reutilizar la identidad con datos diferentes se rechaza.
 3. Guarda actor, motivo, orden, tipo, estado, total, instante del evento, origen e identificador de correlación.

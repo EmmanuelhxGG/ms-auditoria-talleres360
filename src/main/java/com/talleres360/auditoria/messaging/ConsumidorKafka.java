@@ -14,11 +14,17 @@ import org.springframework.stereotype.Component;
 public class ConsumidorKafka {
   private final AuditoriaService service;
   private final ObjectMapper json;
+  private final org.springframework.kafka.core.KafkaTemplate<String, String> kafka;
 
   @KafkaListener(
       topics = "${app.kafka.topic:orders.events}",
       groupId = "${app.kafka.group-id:talleres360-auditoria}")
-  public void consumir(String mensaje) throws java.io.IOException {
-    service.registrar(json.readValue(mensaje, EventoEntrada.class));
+  public void consumir(String mensaje) throws Exception {
+    var evento = json.readValue(mensaje, EventoEntrada.class);
+    service.registrar(evento);
+    // El offset solo avanza después de persistir y confirmar el timeline en Kafka.
+    kafka
+        .send("audit.timeline", evento.eventId(), mensaje)
+        .get(15, java.util.concurrent.TimeUnit.SECONDS);
   }
 }
