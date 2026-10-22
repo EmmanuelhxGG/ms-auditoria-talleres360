@@ -16,32 +16,12 @@ spring:
     name: ms-talleres360-audit
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    consumer:
-      auto-offset-reset: earliest
-      enable-auto-commit: false
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      acks: all
-      properties:
-        enable.idempotence: true
-    listener:
-      ack-mode: record
-      auto-startup: ${KAFKA_ENABLED:false}
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: ${DDL_AUTO:update}
 app:
   internal-key: ${INTERNAL_API_KEY:}
-  kafka:
-    enabled: ${KAFKA_ENABLED:false}
-    topic: ${KAFKA_ORDERS_TOPIC:orders.events}
-    group-id: ${KAFKA_GROUP_ID:talleres360-auditoria}
 ---
 spring:
   config:
