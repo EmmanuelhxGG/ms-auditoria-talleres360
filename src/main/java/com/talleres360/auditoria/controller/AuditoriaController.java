@@ -3,6 +3,7 @@ package com.talleres360.auditoria.controller;
 import com.talleres360.auditoria.dto.EventoEntrada;
 import com.talleres360.auditoria.dto.EventoVista;
 import com.talleres360.auditoria.dto.Pagina;
+import com.talleres360.auditoria.dto.SolicitudVista;
 import com.talleres360.auditoria.service.AuditoriaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -39,7 +40,21 @@ public class AuditoriaController {
         service.consultar(orderId, actor, type, from, to, page, size).map(EventoVista::desde));
   }
 
-  // Compatibilidad con el dashboard existente: devuelve lista, no Page.
+  @GetMapping("/api/audit/solicitudes")
+  public Pagina<SolicitudVista> solicitudes(
+      @RequestParam(required = false) @Positive Long orderId,
+      @RequestParam(required = false) @Size(max = 160) String actor,
+      @RequestParam(required = false) @Size(max = 60) String type,
+      @RequestParam(required = false) Instant from,
+      @RequestParam(required = false) Instant to,
+      @RequestParam(defaultValue = "0") @Min(0) int page,
+      @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
+      @RequestHeader("X-Actor-Role") String role) {
+    exigirAdministrador(role);
+    return Pagina.desde(service.solicitudes(orderId, actor, type, from, to, page, size));
+  }
+
+  // Compatibilidad con el dashboard anterior: devuelve lista, no Page.
   @GetMapping("/api/reports/audit")
   public List<EventoVista> anterior(
       @RequestParam(required = false) @Positive Long orderId,
