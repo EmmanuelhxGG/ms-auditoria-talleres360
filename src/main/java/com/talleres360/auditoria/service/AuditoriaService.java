@@ -24,6 +24,7 @@ public class AuditoriaService {
           "ACTUALIZADA",
           "ACEPTADA",
           "EN_REPARACION",
+          "EN_PREPARACION",
           "LISTA_PARA_ENTREGA",
           "ENTREGADA",
           "CANCELADA",
@@ -31,7 +32,7 @@ public class AuditoriaService {
           "INFORME_ACTUALIZADO");
   private static final Set<String> ESTADOS =
       Set.of(
-          "RECIBIDA", "ACEPTADA", "EN_REPARACION", "LISTA_PARA_ENTREGA", "ENTREGADA", "CANCELADA");
+          "RECIBIDA", "ACEPTADA", "EN_REPARACION", "EN_PREPARACION", "LISTA_PARA_ENTREGA", "ENTREGADA", "CANCELADA");
   private final EventoAuditoriaRepository repository;
   private final Validator validator;
   private final ConsultaSolicitudesRepository consultasSolicitudes;
