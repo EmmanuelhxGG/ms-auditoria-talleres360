@@ -1,5 +1,13 @@
 # Talleres360 — Microservicio de auditoría
 
+## Base de datos compartida
+
+La configuración actual usa una sola PostgreSQL `talleres360` para los cinco
+microservicios. `compose.yml` levanta solo esta aplicación y exige `DB_URL`.
+Consulta [BASE_DE_DATOS.md](BASE_DE_DATOS.md) para conexión y comandos de consulta.
+Los ejemplos antiguos con una base por servicio describen el despliegue anterior.
+
+
 Servicio independiente que registra eventos de negocio de las órdenes: quién las creó, aceptó, actualizó, entregó o canceló y cuándo ocurrió. Ofrece una línea de tiempo consultable por orden, actor, tipo y fecha. No calcula ventas ni reemplaza el microservicio de reportería.
 
 Documentación actualizada el **22 de octubre de 2026**. Repositorio independiente,

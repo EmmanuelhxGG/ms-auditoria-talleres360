@@ -13,9 +13,9 @@ import org.springframework.data.domain.Persistable;
 @Table(
     name = "eventos_auditoria",
     indexes = {
-      @Index(name = "idx_audit_orden", columnList = "orderId"),
-      @Index(name = "idx_audit_fecha", columnList = "occurredAt"),
-      @Index(name = "idx_audit_actor", columnList = "actor")
+      @Index(name = "idx_audit_orden", columnList = "solicitud_id"),
+      @Index(name = "idx_audit_fecha", columnList = "ocurrido_en"),
+      @Index(name = "idx_audit_actor", columnList = "usuario_accion")
     })
 @Getter
 @Setter
@@ -42,33 +42,33 @@ public class EventoAuditoria implements Persistable<String> {
   }
 
   @Id
-  @Column(length = 36)
+  @Column(name = "evento_id", length = 36)
   private String eventId;
 
-  @Column(nullable = false)
+  @Column(name = "solicitud_id", nullable = false)
   private Long orderId;
 
-  @Column(nullable = false, length = 60)
+  @Column(name = "tipo", nullable = false, length = 60)
   private String type;
 
-  @Column(nullable = false, length = 160)
+  @Column(name = "usuario_accion", nullable = false, length = 160)
   private String actor;
 
-  @Column(length = 500)
+  @Column(name = "motivo", length = 500)
   private String reason;
 
-  @Column(nullable = false)
+  @Column(name = "ocurrido_en", nullable = false)
   private Instant occurredAt;
 
-  @Column(nullable = false, length = 30)
+  @Column(name = "estado", nullable = false, length = 30)
   private String status;
 
-  @Column(nullable = false, precision = 12, scale = 2)
+  @Column(name = "total", nullable = false, precision = 12, scale = 2)
   private BigDecimal total;
 
-  @Column(length = 80)
+  @Column(name = "origen", length = 80)
   private String source;
 
-  @Column(length = 80)
+  @Column(name = "correlacion_id", length = 80)
   private String correlationId;
 }

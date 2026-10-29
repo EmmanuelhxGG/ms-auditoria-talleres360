@@ -1,19 +1,5 @@
 name: talleres360-auditoria
 services:
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: audit_db
-      POSTGRES_USER: ${DB_USERNAME:?Configura DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:?Configura DB_PASSWORD}
-    volumes:
-      - datos_postgres:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-    restart: unless-stopped
   auditoria:
     build: .
     image: talleres360/ms-auditoria:local
@@ -22,15 +8,11 @@ services:
     environment:
       SERVER_PORT: "8085"
       SPRING_PROFILES_ACTIVE: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=60"
       TZ: America/Santiago
-      DB_URL: jdbc:postgresql://postgres:5432/audit_db
+      DB_URL: ${DB_URL:?Configura la URL de la base compartida talleres360}
       DB_USERNAME: ${DB_USERNAME:?Configura DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD:?Configura DB_PASSWORD}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:?Configura INTERNAL_API_KEY}
-    depends_on:
-      postgres:
-        condition: service_healthy
     restart: unless-stopped
-volumes:
-  datos_postgres:
