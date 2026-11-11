@@ -37,13 +37,13 @@ compose.yml        Aplicación y PostgreSQL con volumen independiente.
 
 ## Funcionamiento
 
-Desde el 21 de octubre de 2026 Kafka y su infraestructura fueron retirados del
-repositorio. Órdenes envía los eventos mediante su outbox HTTP persistente a
-`POST /internal/events`, confirma cada respuesta exitosa y reintenta lo pendiente.
+Con KAFKA_ENABLED=true consume orders.events en el grupo talleres360-auditoria.
+Los eventos que agotan reintentos van a orders.events.auditoria.DLT. El endpoint
+POST /internal/events sigue disponible para instalaciones con outbox HTTP.
 Los eventos históricos permanecen en la base. La línea de tiempo y las consultas
 del frontend a través del BFF no dependen del broker.
 
-1. Recibe un evento por HTTP interno y valida su contenido.
+1. Recibe un evento desde Kafka o desde la API interna y valida su contenido.
 2. Usa `eventId` como identidad estable: repetir un evento no duplica la línea de tiempo. Reutilizar la identidad con datos diferentes se rechaza.
 3. Guarda actor, motivo, orden, tipo, estado, total, instante del evento, origen e identificador de correlación.
 4. Expone consultas paginadas ordenadas por fecha descendente y por identidad para desempatar.
@@ -150,8 +150,7 @@ migraciones y utilizar permisos de base acotados.
 
 ## Conexión con el sistema
 
-La ingesta HTTP es ahora el transporte principal. Los reintentos corresponden al
-outbox de Órdenes y son independientes de Reportería y Notificaciones. Las
+Kafka confirma el avance de Auditoría por separado. El outbox de Órdenes reintenta la publicación hasta obtener confirmación del broker. Las
 operaciones públicas son de lectura. El productor deriva el actor de la identidad
 autenticada. No se borran ni recrean las tablas durante este cambio.
 
@@ -164,8 +163,7 @@ frontend muestra filtros por orden, usuario, evento y fechas. El navegador no
 envía directamente eventos al servicio.
 
 El permiso Admin corresponde a la pantalla de auditoría; no requiere otro rol.
-Autoriza el puerto 8085 solo desde BFF y Órdenes. Kafka no participa en esta versión;
-la conservación del outbox permite reintentar cuando Auditoría vuelve a estar disponible.
+Autoriza el puerto 8085 desde BFF para consultas. En instalaciones con outbox HTTP, autoriza también a Órdenes. Para Kafka configura KAFKA_ENABLED y KAFKA_BOOTSTRAP_SERVERS.
 
 ## Actualización y conservación
 
