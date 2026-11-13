@@ -37,8 +37,8 @@ compose.yml        Aplicación y PostgreSQL con volumen independiente.
 
 ## Funcionamiento
 
-Con KAFKA_ENABLED=true consume orders.events en el grupo talleres360-auditoria.
-Los eventos que agotan reintentos van a orders.events.auditoria.DLT. El endpoint
+Con KAFKA_ENABLED=true consume audit.timeline en el grupo talleres360-auditoria. También puede leer eventos históricos en orders.events durante la transición.
+Los eventos que agotan reintentos van a audit.timeline.auditoria.DLT o a orders.events.auditoria.DLT según el tópico de origen. El endpoint
 POST /internal/events sigue disponible para instalaciones con outbox HTTP.
 Los eventos históricos permanecen en la base. La línea de tiempo y las consultas
 del frontend a través del BFF no dependen del broker.

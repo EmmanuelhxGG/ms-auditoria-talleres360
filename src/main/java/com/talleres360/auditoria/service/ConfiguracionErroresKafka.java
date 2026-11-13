@@ -15,7 +15,7 @@ class ConfiguracionErroresKafka {
   @Bean
   DefaultErrorHandler erroresKafka(KafkaTemplate<String, String> kafka) {
     var recuperador = new DeadLetterPublishingRecoverer(
-        kafka, (registro, error) -> new TopicPartition("orders.events.auditoria.DLT", registro.partition()));
+        kafka, (registro, error) -> new TopicPartition(registro.topic() + ".auditoria.DLT", registro.partition()));
     recuperador.setFailIfSendResultIsError(true);
     return new DefaultErrorHandler(recuperador, new FixedBackOff(1000L, 2L));
   }
